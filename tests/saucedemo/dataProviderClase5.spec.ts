@@ -1,5 +1,4 @@
-import { test, expect } from "@playwright/test";
-import { SauceLoginPage } from "../../pages/saucedemo/SauceLoginPage";
+import { test, expect } from "../../fixtures/saucedemo";
 import { loadUserDataProvider } from "../../utils/saucedemo/userDataProvider";
 
 test.describe(
@@ -8,9 +7,8 @@ test.describe(
   () => {
     loadUserDataProvider().forEach((user) => {
       test(`Validar acceso para el escenario: ${user.scenario}`, async ({
-        page,
+        loginPage: sauceLoginPage,
       }) => {
-        const sauceLoginPage = new SauceLoginPage(page);
         await test.step("Paso 1: Abrir la página de inicio de sesión", async () => {
           await sauceLoginPage.goto();
         });
