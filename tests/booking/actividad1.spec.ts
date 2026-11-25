@@ -1,13 +1,11 @@
-import { test, expect } from "@playwright/test";
-import { BookingSearchPage } from "../../pages/booking/BookingSearchPage";
+import { test, expect } from "../../fixtures/bookingFixtures";
 import { futureStay } from "../../utils/booking/bookingDates";
 
 test.describe("Booking - Actividad 1: búsqueda de alojamientos", () => {
-  test("@booking Buscar destino con fechas y personas redirige a resultados", async ({ page }) => {
+  test("@booking Buscar destino con fechas y personas redirige a resultados", async ({ page, searchPage }) => {
     const destino = "Bariloche";
     const adultos = 3;
     const { checkIn, checkOut } = futureStay(30, 3);
-    const searchPage = new BookingSearchPage(page);
 
     await searchPage.goto();
 

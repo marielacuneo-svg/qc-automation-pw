@@ -29,6 +29,48 @@ check-out y cantidad de adultos. La URL final se registra como anotación en el 
 **Impacto:** las Actividades 2 (filtros sobre resultados), 3 (abrir un alojamiento) y
 4 (checkout) dependen de la grilla de resultados.
 
+**Cómo se resolvió en las Actividades 2, 3 y 4:** los tests ejecutan el flujo real y, después
+de buscar, consultan `BookingResultsPage.hasResults()`. Si Booking bloqueó los resultados, el
+test queda **skipped** con el motivo en el reporte (`test.skip(condición, motivo)`), en lugar
+de fallar o de dar un falso positivo. Si Booking deja de bloquear, los tests corren completos
+sin cambios.
+
+**Selectores que no se pudieron verificar contra el sitio real** (por el bloqueo):
+
+| Page Object | Selector | Estado |
+|---|---|---|
+| BookingResultsPage | `[data-testid="property-card"]`, `title`, `title-link` | No verificado |
+| BookingResultsPage | checkbox "Cancelación gratis" / "Muy bien: 8 o más" | No verificado |
+| BookingDetailPage | `#hp_hotel_name h1` (nombre del hotel) | **Verificado** abriendo una ficha directamente |
+| BookingDetailPage | `#hprt-table select`, botón "Reservaré" | No verificado: la ficha también pierde las fechas y no muestra habitaciones |
+| BookingCheckoutPage | `#firstname`, `#lastname`, `#email`, botón "Siguiente" | No verificado: no se puede llegar al checkout |
+
+Los mensajes de error del checkout se localizan por `aria-describedby` del input (la forma
+accesible de asociar un error a un campo) para no depender de clases CSS.
+
+## 1b. Variantes A/B del buscador
+
+Booking muestra distintas versiones de la home a distintas sesiones (se nota al correr tests
+en paralelo):
+
+- En una variante el destino se llama "Buscá con tus propias palabras" y el botón de personas
+  no tiene `data-testid="occupancy-config"` → se usa `.or()` con su nombre accesible.
+- En otra, el calendario y las personas se abren como modal que tapa el formulario hasta
+  tocar "Confirmar"/"Listo" → `confirmIfModal()` lo cierra solo si aparece.
+
+Por la cantidad de pasos y esperas, el timeout de los tests de Booking se subió a 90 s con una
+fixture automática (`bookingTimeout` en `fixtures/bookingFixtures.ts`).
+
+Estabilidad comprobada: 44 ejecuciones (4 tests × 11 repeticiones, 4 en paralelo) sin fallas.
+
+## 1c. La ficha del hotel se abre en otra pestaña y las fixtures usan `page`
+
+Las fixtures se crean con la `page` del test, pero la ficha se abre en una pestaña nueva.
+- Actividad 3: se instancia `BookingDetailPage` con la nueva referencia de Page (lo que pide
+  la consigna).
+- Actividad 4: se abre la URL de la pestaña nueva en `page` y se cierra la nueva, para que la
+  fixture `checkoutPage` trabaje sobre la misma página.
+
 ## 2. Popup de Genius ("Iniciá sesión y ahorrá")
 
 Aparece unos segundos después de cargar la home, en un momento variable, y al cerrarse

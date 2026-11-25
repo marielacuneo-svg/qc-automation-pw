@@ -1,32 +1,30 @@
-import { test, expect } from "@playwright/test";
-import { BookingSearchPage } from "../../pages/booking/BookingSearchPage";
-import { BookingResultsPage } from "../../pages/booking/BookingResultsPage";
+import { test, expect } from "../../fixtures/bookingFixtures";
 import { BookingDetailPage } from "../../pages/booking/BookingDetailPage";
-import { BookingCheckoutPage } from "../../pages/booking/BookingCheckoutPage";
 import { futureStay } from "../../utils/booking/bookingDates";
 import { BOOKING_SIN_RESULTADOS } from "../../utils/booking/bookingLimitations";
 
 test.describe("Booking - Actividad 4: validaciones negativas en el checkout", () => {
-  test("@booking Enviar datos del huésped vacíos no avanza y muestra errores", async ({ page }) => {
+  test("@booking Enviar datos del huésped vacíos no avanza y muestra errores", async ({ page, searchPage, searchResultsPage, checkoutPage }) => {
     const { checkIn, checkOut } = futureStay(30, 3);
-    const searchPage = new BookingSearchPage(page);
-    const resultsPage = new BookingResultsPage(page);
 
     await searchPage.goto();
     await searchPage.searchDestination("Bariloche", checkIn, checkOut, 2);
-    test.skip(!(await resultsPage.hasResults()), BOOKING_SIN_RESULTADOS);
+    test.skip(!(await searchResultsPage.hasResults()), BOOKING_SIN_RESULTADOS);
 
-    const { newPage } = await resultsPage.openProperty(0);
-    const detailPage = new BookingDetailPage(newPage);
-    await detailPage.handlePopups();
+    // La ficha se abre en una pestaña nueva. Para que la fixture checkoutPage (atada a `page`)
+    // sirva, abrimos la URL de esa pestaña en la página principal y cerramos la nueva.
+    const { newPage } = await searchResultsPage.openProperty(0);
+    await page.goto(newPage.url());
+    await newPage.close();
+
+    const detailPage = new BookingDetailPage(page);
     await detailPage.reserveFirstRoom();
 
-    const checkoutPage = new BookingCheckoutPage(newPage);
-    const urlCheckout = newPage.url();
+    const urlCheckout = page.url();
     await checkoutPage.submitEmptyForm();
 
     // El formulario no avanza
-    await expect(newPage).toHaveURL(urlCheckout);
+    await expect(page).toHaveURL(urlCheckout);
 
     for (const campo of [checkoutPage.inputFirstName, checkoutPage.inputLastName, checkoutPage.inputEmail]) {
       const html5 = await checkoutPage.getHtml5ValidationMessage(campo);

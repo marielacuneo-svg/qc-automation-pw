@@ -10,6 +10,7 @@ export class BookingSearchPage extends BookingBasePage {
   private readonly btnNextMonth: Locator;
   private readonly occupancyConfig: Locator;
   private readonly inputAdults: Locator;
+  private readonly btnConfirm: Locator;
   private readonly btnSearch: Locator;
 
   constructor(page: Page) {
@@ -20,8 +21,16 @@ export class BookingSearchPage extends BookingBasePage {
     this.calendar = page.locator('[data-testid="searchbox-datepicker-calendar"]');
     // Booking escribe "Mes siquiente" (con q): usamos regex para no depender del typo
     this.btnNextMonth = this.calendar.getByRole("button", { name: /^(Mes si|Next month)/ });
-    this.occupancyConfig = page.locator('[data-testid="occupancy-config"]');
+    // Booking hace pruebas A/B del buscador: en una variante este botón no tiene data-testid
+    this.occupancyConfig = page
+      .locator('[data-testid="occupancy-config"]')
+      .or(page.getByRole("button", { name: /Cantidad de personas y habitaciones/i }));
     this.inputAdults = page.locator("#group_adults");
+    // en el modal de personas conviven "Confirmar" y "Listo": tomamos el primero visible
+    this.btnConfirm = page
+      .getByRole("button", { name: /^(Confirmar|Listo)$/ })
+      .filter({ visible: true })
+      .first();
     this.btnSearch = page.locator('button[type="submit"]');
   }
 
@@ -53,6 +62,7 @@ export class BookingSearchPage extends BookingBasePage {
     }
     await this.clickDay(fechaInicio);
     await this.clickDay(fechaFin);
+    await this.confirmIfModal();
   }
 
   async setAdults(adultos: number) {
@@ -69,6 +79,17 @@ export class BookingSearchPage extends BookingBasePage {
     while (actual > adultos) {
       await btnMinus.click();
       actual--;
+    }
+    await this.confirmIfModal();
+  }
+
+  /**
+   * En una variante A/B del buscador, el calendario y las personas se abren como modal
+   * con un botón "Confirmar"/"Listo" que tapa el resto del formulario hasta cerrarlo.
+   */
+  private async confirmIfModal() {
+    if (await this.btnConfirm.isVisible()) {
+      await this.btnConfirm.click();
     }
   }
 
