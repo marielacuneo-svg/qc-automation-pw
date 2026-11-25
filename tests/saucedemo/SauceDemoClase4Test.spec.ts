@@ -9,7 +9,7 @@ import { SauceCheckoutOverviewPage } from "../../pages/saucedemo/SauceCheckoutOv
 import { SauceLoginPage } from "../../pages/saucedemo/SauceLoginPage";
 import { SauceInventoryPage } from "../../pages/saucedemo/SauceInventoryPage";
 import { SauceProductDetailPage } from "../../pages/saucedemo/SauceProductDetailPage";
-import { SauceCheckoutInformationPage } from "../../pages/saucedemo/SauceCheckoutInformationPAge";
+import { SauceCheckoutInformationPage } from "../../pages/saucedemo/SauceCheckoutInformationPage";
 
 // Estas constantes centralizan las credenciales para reutilizarlas.
 const STANDARD_USER = "standard_user";
@@ -313,7 +313,7 @@ test.describe(
 
         await test.step("Paso 2: Verificar ambos productos en el carrito", async () => {
           await inventoryPage.openCart();
-          await expect(await cartPage.getItemCount()).toBe(2);
+          await expect.poll(() => cartPage.getItemCount()).toBe(2);
           await expect(await cartPage.getItemNames()).toEqual([
             "Sauce Labs Backpack",
             "Sauce Labs Bike Light",
@@ -328,7 +328,7 @@ test.describe(
 
         await test.step("Paso 4: Confirmar que los productos siguen en el carrito", async () => {
           await inventoryPage.openCart();
-          await expect(await cartPage.getItemCount()).toBe(2);
+          await expect.poll(() => cartPage.getItemCount()).toBe(2);
           await expect(await cartPage.getItemNames()).toEqual([
             "Sauce Labs Backpack",
             "Sauce Labs Bike Light",
@@ -358,7 +358,7 @@ test.describe(
 
           await test.step("Paso 2: Revisar el carrito y comenzar el checkout", async () => {
             await inventoryPage.openCart();
-            await expect(await cartPage.getItemCount()).toBe(2);
+            await expect.poll(() => cartPage.getItemCount()).toBe(2);
             await expect(await cartPage.getItemNames()).toEqual([
               "Sauce Labs Backpack",
               "Sauce Labs Bike Light",

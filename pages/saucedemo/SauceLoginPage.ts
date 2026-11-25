@@ -31,7 +31,10 @@ export class SauceLoginPage {
 
   async getInventoryPageVisible() {
     await this.page.waitForURL(/inventory.html/);
-    await expect(this.page.getByText("Products", { exact: true })).toBeVisible();
+    // performance_glitch_user tarda unos 5 s a propósito: damos más margen que el default (5 s).
+    await expect(this.page.getByText("Products", { exact: true })).toBeVisible({
+      timeout: 10_000,
+    });
     return true;
   }
 

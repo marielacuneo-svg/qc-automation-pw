@@ -53,6 +53,8 @@ export class SauceInventoryPage {
 
   async openCart() {
     await this.page.locator(".shopping_cart_link").click();
+    await this.page.waitForURL(/cart\.html/);
+    await this.page.locator('[data-test="checkout"]').waitFor();
   }
 
   async orderByPrice(option: string, expectedResult: string) {
@@ -66,6 +68,7 @@ export class SauceInventoryPage {
 
   async openProductDetail(productName: string) {
     await this.page.getByText(productName, { exact: true }).click();
+    await this.page.locator('[data-test="back-to-products"]').waitFor();
   }
 
   async openInventoryDirectly() {

@@ -22,10 +22,13 @@ export class SauceCheckoutOverviewPage {
   }
 
   async getItemCount() {
+    // Esperamos que cargue la página de resumen antes de contar los productos.
+    await this.btnFinish.waitFor();
     return this.cartItems.count();
   }
 
   async getItemNames() {
+    await this.btnFinish.waitFor();
     return this.cartItemNames.allTextContents();
   }
 
