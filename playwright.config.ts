@@ -30,13 +30,22 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Booking: idioma, zona horaria y tamaño fijos para que textos, fechas y layout sean estables */
+    locale: 'es-AR',
+    timezoneId: 'America/Argentina/Buenos_Aires',
+
+    /* Evidencias para la entrega: captura al final de cada test y video si falla */
+    screenshot: 'on',
+    video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      // el viewport va después del spread porque devices[...] trae uno propio (1280x720)
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 900 } },
     }/*,
 
     {
